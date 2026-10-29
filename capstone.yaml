@@ -1,0 +1,49 @@
+name: flyrank-capstone-metering-billing
+track: backend
+capstone: usage-metering-billing-engine
+language: python
+framework: fastapi
+
+base_url: http://localhost:8000
+
+# Single-command startup, seed, and automated test suite
+run: uvicorn app.main:app --host 0.0.0.0 --port 8000
+seed: python3 scripts/seed.py
+test: pytest -v
+
+endpoints:
+  health:
+    method: GET
+    path: /health
+  billable_action:
+    method: POST
+    path: /generate
+    headers:
+      Idempotency-Key: "<unique-idempotency-key>"
+  meter_alias:
+    method: POST
+    path: /meter
+    headers:
+      Idempotency-Key: "<unique-idempotency-key>"
+  usage_rollup:
+    method: GET
+    path: /usage
+    query_params:
+      tenant_id: "tenant_free"
+  stripe_checkout:
+    method: POST
+    path: /billing/checkout
+  stripe_webhook:
+    method: POST
+    path: /webhooks/stripe
+    headers:
+      Stripe-Signature: "t=<timestamp>,v1=<hmac_sha256>"
+  background_reconciliation:
+    method: POST
+    path: /jobs/reconcile
+  plans:
+    method: GET
+    path: /plans
+  tenants:
+    method: GET
+    path: /tenants
